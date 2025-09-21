@@ -1,0 +1,17 @@
+run_name: r_trial
+
+paths:
+  train_data: "E:/OneDrive/Projects/programming/mf-lift/data/r_train.csv"
+  val_data: "E:/OneDrive/Projects/programming/mf-lift/data/r_val.csv"
+  test_data: "E:/OneDrive/Projects/programming/mf-lift/data/r_test.csv"
+  pred_data: "E:/OneDrive/Projects/programming/mf-lift/data/r.csv"
+  output_dir: experiments/
+
+model: 
+  hidden_layers: [256,128,64]
+
+training:
+  batch_size: 64
+  num_workers: 10
+  max_epochs: 500
+  learning_rate: 0.01
