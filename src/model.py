@@ -1,11 +1,17 @@
 import lightning as L
 import torch
 import torch.nn as nn
-from torch.optim.lr_scheduler import StepLR
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 
 class LiftFNN(L.LightningModule):
-    def __init__(self, hidden_layers: list[int]) -> None:
+    def __init__(
+        self,
+        hidden_layers: list[int],
+        learning_rate: float,
+        lr_scheduler_patience: int,
+        lr_scheduler_factor: float,
+    ) -> None:
         super().__init__()
 
         layers = []
@@ -24,6 +30,11 @@ class LiftFNN(L.LightningModule):
 
         self.stack = nn.Sequential(*layers)
 
+        # Training hyperparams
+        self.learning_rate = learning_rate
+        self.lr_scheduler_patience = lr_scheduler_patience
+        self.lr_scheduler_factor = lr_scheduler_factor
+
     def forward(self, x):
         return self.stack(x)
 
@@ -37,19 +48,28 @@ class LiftFNN(L.LightningModule):
         stage = "val"
         loss = self._common_step(batch, batch_idx)
         self._common_log(stage, loss)
-        self.log("learning_rate", self.optimizers().param_groups[0]["lr"])
 
     def test_step(self, batch, batch_idx):
         return self._common_step(batch, batch_idx)
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=0.01)
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         scheduler = {
-            "scheduler": StepLR(optimizer, step_size=200, gamma=0.1),
+            "scheduler": ReduceLROnPlateau(
+                optimizer,
+                mode="min",
+                factor=self.lr_scheduler_factor,
+                patience=self.lr_scheduler_patience,
+                min_lr=1e-6,
+            ),
+            "monitor": "loss/val",
             "interval": "epoch",
             "frequency": 1,
         }
         return [optimizer], [scheduler]
+
+    def on_train_epoch_end(self):
+        self.log("learning_rate", self.optimizers().param_groups[0]["lr"])
 
     def _common_step(self, batch, batch_idx):
         x, y = batch

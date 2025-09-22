@@ -3,7 +3,7 @@ from pathlib import Path
 
 import lightning as L
 from lightning.pytorch.loggers import TensorBoardLogger, CSVLogger
-from lightning.pytorch.callbacks import ModelCheckpoint
+from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping
 import yaml
 
 from src.config import Config
@@ -31,12 +31,18 @@ def trainer(config: Config):
         batch_size=config.training.batch_size,
         num_workers=config.training.num_workers,
     )
-    model = LiftFNN(hidden_layers=config.model.hidden_layers)
+    model = LiftFNN(
+        hidden_layers=config.model.hidden_layers,
+        learning_rate=config.training.learning_rate,
+        lr_scheduler_patience=config.training.lr_scheduler_patience,
+        lr_scheduler_factor=config.training.lr_scheduler_factor,
+    )
 
     # Init logging
     tb_logger = TensorBoardLogger(save_dir=logs_dir, name="", version="")
     csv_logger = CSVLogger(save_dir=logs_dir, name="", version="")
 
+    # Train
     checkpoint_cb = ModelCheckpoint(
         dirpath=checkpoints_dir,
         filename="{epoch}-{step}-{val_loss:.2f}",
@@ -47,13 +53,16 @@ def trainer(config: Config):
         save_last=True,
     )
 
-    # Train
+    early_stopping_cb = EarlyStopping(
+        "loss/val",
+        patience=config.training.early_stop_patience,
+    )
+
     trainer = L.Trainer(
         max_epochs=config.training.max_epochs,
         default_root_dir=output_dir,
-        callbacks=[checkpoint_cb],
+        callbacks=[checkpoint_cb, early_stopping_cb],
         logger=[tb_logger, csv_logger],
-        # accelerator="cpu",
     )
     trainer.fit(model, datamodule=data_module)
 

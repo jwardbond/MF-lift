@@ -19,6 +19,9 @@ class TrainingConfig(BaseModel):
     num_workers: int
     max_epochs: int
     learning_rate: float
+    early_stop_patience: 30
+    lr_scheduler_patience: 20
+    lr_scheduler_factor: 0.5
 
 
 class Config(BaseModel):
