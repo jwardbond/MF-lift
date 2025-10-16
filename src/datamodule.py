@@ -62,7 +62,7 @@ class LiftDataModule(L.LightningDataModule):
                 raise ValueError("test_path must be provided for 'test' stage")
 
             # Check for fitted scaler
-            if not hasattr(self.scaler, "mean_"):
+            if not hasattr(self.scaler, "scale_"):
                 raise ValueError("trained scaler must be provided for 'test' stage")
 
             test_df = pd.read_csv(self.test_path)
@@ -73,7 +73,7 @@ class LiftDataModule(L.LightningDataModule):
                 raise ValueError("pred_path must be provided for 'predict' stage")
 
             # Check for fitted scaler
-            if not hasattr(self.scaler, "mean_"):
+            if not hasattr(self.scaler, "scale"):
                 raise ValueError("trained scaler must be provided for 'predict' stage")
 
             pred_df = pd.read_csv(self.pred_path)
@@ -118,16 +118,29 @@ class LiftDataModule(L.LightningDataModule):
     def save_scaler(self, dir: Path):
         """Save the scaler params and scaler sklearn object."""
 
-        means = self.scaler.mean_.tolist()
-        stdev = self.scaler.scale_.tolist()
-        variance = self.scaler.var_.tolist()
-
         scaler_dict = {
-            "mean": means,
-            "stdev": stdev,
-            "variance": variance,
             "feature_cols": self.feature_cols,
+            "scaler_type": type(self.scaler).__name__,
         }
+
+        # Check for attributes specific to the fitted scaler type
+        if hasattr(self.scaler, "mean_"):
+            # Standard Scaler
+            scaler_dict["mean"] = self.scaler.mean_.tolist()
+            scaler_dict["variance"] = self.scaler.var_.tolist()
+            # scale_ is common to both
+            scaler_dict["scale"] = self.scaler.scale_.tolist()
+        elif hasattr(self.scaler, "min_"):
+            # MinMax Scaler
+            scaler_dict["min"] = self.scaler.min_.tolist()
+            scaler_dict["max"] = (self.scaler.min_ + self.scaler.data_range_).tolist()
+            # scale_ is common to both
+            scaler_dict["scale"] = self.scaler.scale_.tolist()
+        else:
+            raise AttributeError(
+                "Scaler is not a recognized type (StandardScaler or MinMaxScaler) "
+                "or has not been fitted."
+            )
 
         yaml_path = dir / "scaler.yaml"
         with yaml_path.open("w") as f:
