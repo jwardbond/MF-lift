@@ -45,7 +45,8 @@ def trainer(config: Config):
     # Train
     checkpoint_cb = ModelCheckpoint(
         dirpath=checkpoints_dir,
-        filename="{epoch}-{step}-{val_loss:.2f}",
+        auto_insert_metric_name=False,
+        filename="e{epoch}-v{loss/val:.3e}",
         save_top_k=2,
         verbose=True,
         monitor="loss/val",
@@ -69,7 +70,7 @@ def trainer(config: Config):
     # Save outputs
     data_module.save_scaler(output_dir)
     with output_dir.joinpath("config.yaml").open("w") as f:
-        yaml.dump(config, f)
+        yaml.dump(config.model_dump(), f)
 
 
 def parse_args():
