@@ -13,6 +13,7 @@ class PathsConfig(BaseModel):
 class DataConfig(BaseModel):
     batch_size: int
     num_workers: int
+    persistent_workers: bool
     feature_cols: list[str]
     target_cols: list[str]
 
@@ -22,6 +23,7 @@ class ModelConfig(BaseModel):
 
 
 class TrainingConfig(BaseModel):
+    device: str
     max_epochs: int
     learning_rate: float
     lr_scheduler_patience: int

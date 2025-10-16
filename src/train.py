@@ -63,7 +63,7 @@ def trainer(config: Config):
     )
 
     trainer = L.Trainer(
-        accelerator="cpu",
+        accelerator=config.training.device,
         max_epochs=config.training.max_epochs,
         default_root_dir=output_dir,
         callbacks=[checkpoint_cb, early_stopping_cb],

@@ -22,8 +22,12 @@ class LiftDataModule(L.LightningDataModule):
         scaler=None,
         batch_size=32,
         num_workers=4,
+        persistent_workers=False,
     ):
         super().__init__()
+        self.feature_cols = feature_cols
+        self.target_cols = target_cols
+
         self.train_path = train_path
         self.val_path = val_path
         self.test_path = test_path
@@ -31,9 +35,7 @@ class LiftDataModule(L.LightningDataModule):
 
         self.batch_size = batch_size
         self.num_workers = num_workers
-
-        self.feature_cols = feature_cols
-        self.target_cols = target_cols
+        self.persistent_workers = persistent_workers
 
         self.scaler = scaler  # can be None, will be created during setup if so
 
@@ -83,7 +85,7 @@ class LiftDataModule(L.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=True,
-            persistent_workers=True,
+            persistent_workers=self.persistent_workers,
         )
 
     def val_dataloader(self):
@@ -92,7 +94,7 @@ class LiftDataModule(L.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=False,
-            persistent_workers=True,
+            persistent_workers=self.persistent_workers,
         )
 
     def test_dataloader(self):
@@ -101,7 +103,7 @@ class LiftDataModule(L.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=False,
-            persistent_workers=True,
+            persistent_workers=self.persistent_workers,
         )
 
     def predict_dataloader(self):
@@ -110,7 +112,7 @@ class LiftDataModule(L.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=False,
-            persistent_workers=True,
+            persistent_workers=self.persistent_workers,
         )
 
     def save_scaler(self, dir: Path):
