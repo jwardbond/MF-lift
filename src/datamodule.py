@@ -1,21 +1,23 @@
 from pathlib import Path
 import pickle
+from typing import Self
 
 import lightning as L
 import pandas as pd
 import torch
 import yaml
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from torch.utils.data import DataLoader, TensorDataset
 
 
 class LiftDataModule(L.LightningDataModule):
     def __init__(
         self,
-        train_path,
-        val_path,
-        test_path,
-        pred_path,
+        train_path=None,
+        val_path=None,
+        test_path=None,
+        pred_path=None,
+        scaler=None,
         batch_size=32,
         num_workers=4,
     ):
@@ -40,11 +42,19 @@ class LiftDataModule(L.LightningDataModule):
         ]
         self.target_cols = ["logCL", "nx", "ny"]
 
-        self.scaler = StandardScaler()
+        self.scaler = scaler  # can be None, will be created during setup if so
 
     def setup(self, stage: str):
         if stage == "fit":
+            if not (self.train_path and self.val_path):
+                raise ValueError(
+                    "train_path and val_path must be provided for 'fit' stage"
+                )
+
             train_df = pd.read_csv(self.train_path)
+
+            # Fit scaler on training data
+            self.scaler = MinMaxScaler() if self.scaler is None else self.scaler
             self.scaler.fit(train_df[self.feature_cols].to_numpy())
 
             val_df = pd.read_csv(self.val_path)
@@ -53,10 +63,24 @@ class LiftDataModule(L.LightningDataModule):
             self.val_set = self._create_dataset(val_df)
 
         elif stage == "test":
-            test_df = pd.read_csv(self.test_path)
-            self.test_set = self._create_dataset(val_df)
+            if not self.test_path:
+                raise ValueError("test_path must be provided for 'test' stage")
 
-        elif stage == "pred":
+            # Check for fitted scaler
+            if not hasattr(self.scaler, "mean_"):
+                raise ValueError("trained scaler must be provided for 'test' stage")
+
+            test_df = pd.read_csv(self.test_path)
+            self.test_set = self._create_dataset(test_df)
+
+        elif stage == "predict":
+            if not self.pred_path:
+                raise ValueError("pred_path must be provided for 'predict' stage")
+
+            # Check for fitted scaler
+            if not hasattr(self.scaler, "mean_"):
+                raise ValueError("trained scaler must be provided for 'predict' stage")
+
             pred_df = pd.read_csv(self.pred_path)
             self.pred_set = self._create_dataset(pred_df)
 
