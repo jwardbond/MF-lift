@@ -32,6 +32,7 @@ def trainer(config: Config):
         pred_path=config.paths.pred_data,
         batch_size=config.data.batch_size,
         num_workers=config.data.num_workers,
+        persistent_workers=config.data.persistent_workers,
     )
 
     model = LiftFNN(
