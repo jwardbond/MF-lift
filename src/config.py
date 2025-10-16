@@ -10,13 +10,18 @@ class PathsConfig(BaseModel):
     output_dir: str
 
 
+class DataConfig(BaseModel):
+    batch_size: int
+    num_workers: int
+    feature_cols: list[str]
+    target_cols: list[str]
+
+
 class ModelConfig(BaseModel):
     hidden_layers: list[int]
 
 
 class TrainingConfig(BaseModel):
-    batch_size: int
-    num_workers: int
     max_epochs: int
     learning_rate: float
     lr_scheduler_patience: int
@@ -28,15 +33,11 @@ class Config(BaseModel):
     run_name: str
     paths: PathsConfig
     model: ModelConfig
+    data: DataConfig
     training: TrainingConfig
 
     @classmethod
     def from_yaml(cls, path: str) -> "Config":
         with open(path, "r") as f:
             data = yaml.safe_load(f)
-        return cls(
-            run_name=data["run_name"],
-            paths=PathsConfig(**data["paths"]),
-            model=ModelConfig(**data["model"]),
-            training=TrainingConfig(**data["training"]),
-        )
+        return cls(**data)

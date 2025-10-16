@@ -24,13 +24,16 @@ def trainer(config: Config):
 
     # Init data and model
     data_module = LiftDataModule(
+        feature_cols=config.data.feature_cols,
+        target_cols=config.data.target_cols,
         train_path=config.paths.train_data,
         val_path=config.paths.val_data,
         test_path=config.paths.test_data,
         pred_path=config.paths.pred_data,
-        batch_size=config.training.batch_size,
-        num_workers=config.training.num_workers,
+        batch_size=config.data.batch_size,
+        num_workers=config.data.num_workers,
     )
+
     model = LiftFNN(
         hidden_layers=config.model.hidden_layers,
         learning_rate=config.training.learning_rate,
@@ -60,6 +63,7 @@ def trainer(config: Config):
     )
 
     trainer = L.Trainer(
+        accelerator="cpu",
         max_epochs=config.training.max_epochs,
         default_root_dir=output_dir,
         callbacks=[checkpoint_cb, early_stopping_cb],

@@ -13,6 +13,8 @@ from torch.utils.data import DataLoader, TensorDataset
 class LiftDataModule(L.LightningDataModule):
     def __init__(
         self,
+        feature_cols: list[str],
+        target_cols: list[str],
         train_path=None,
         val_path=None,
         test_path=None,
@@ -30,17 +32,8 @@ class LiftDataModule(L.LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
 
-        self.feature_cols = [
-            "Re",
-            "G1",
-            "ux_G1",
-            "uy_G1",
-            "G2",
-            "uxx_G2",
-            "uyy_G2",
-            "uxy_G2",
-        ]
-        self.target_cols = ["logCL", "nx", "ny"]
+        self.feature_cols = feature_cols
+        self.target_cols = target_cols
 
         self.scaler = scaler  # can be None, will be created during setup if so
 
