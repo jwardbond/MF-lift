@@ -13,6 +13,7 @@ class LiftFNN(L.LightningModule):
         lr_scheduler_factor: float,
     ) -> None:
         super().__init__()
+        self.save_hyperparameters()
 
         layers = []
 
@@ -48,9 +49,14 @@ class LiftFNN(L.LightningModule):
         stage = "val"
         loss = self._common_step(batch, batch_idx)
         self._common_log(stage, loss)
+        return loss
 
     def test_step(self, batch, batch_idx):
         return self._common_step(batch, batch_idx)
+
+    def predict_step(self, batch, batch_idx, dataloader_idx=0):
+        x, _ = batch  # ignore y in prediction
+        return self.forward(x)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
