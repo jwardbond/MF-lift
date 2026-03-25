@@ -7,6 +7,7 @@ import pandas as pd
 import torch
 import yaml
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.utils.validation import check_is_fitted
 from torch.utils.data import DataLoader, TensorDataset
 
 
@@ -62,8 +63,7 @@ class LiftDataModule(L.LightningDataModule):
                 raise ValueError("test_path must be provided for 'test' stage")
 
             # Check for fitted scaler
-            if not hasattr(self.scaler, "scale_"):
-                raise ValueError("trained scaler must be provided for 'test' stage")
+            check_is_fitted(self.scaler)
 
             test_df = pd.read_csv(self.test_path)
             self.test_set = self._create_dataset(test_df)
@@ -73,8 +73,7 @@ class LiftDataModule(L.LightningDataModule):
                 raise ValueError("pred_path must be provided for 'predict' stage")
 
             # Check for fitted scaler
-            if not hasattr(self.scaler, "scale"):
-                raise ValueError("trained scaler must be provided for 'predict' stage")
+            check_is_fitted(self.scaler)
 
             pred_df = pd.read_csv(self.pred_path)
             self.pred_set = self._create_dataset(pred_df)

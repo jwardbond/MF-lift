@@ -7,6 +7,8 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 class LiftFNN(L.LightningModule):
     def __init__(
         self,
+        n_inputs: int,
+        n_outputs: int,
         hidden_layers: list[int],
         learning_rate: float,
         lr_scheduler_patience: int,
@@ -18,7 +20,7 @@ class LiftFNN(L.LightningModule):
         layers = []
 
         # Input layer
-        layers.append(nn.Linear(8, hidden_layers[0]))
+        layers.append(nn.Linear(n_inputs, hidden_layers[0]))
         layers.append(nn.ReLU())
 
         # Hidden layers
@@ -27,7 +29,7 @@ class LiftFNN(L.LightningModule):
             layers.append(nn.ReLU())
 
         # Output layer
-        layers.append(nn.Linear(hidden_layers[-1], 3))
+        layers.append(nn.Linear(hidden_layers[-1], n_outputs))
 
         self.stack = nn.Sequential(*layers)
 

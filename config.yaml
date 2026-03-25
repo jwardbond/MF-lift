@@ -9,7 +9,8 @@ paths:
 
 data:
   batch_size: 64
-  num_workers: 11
+  num_workers: 0
+  persistent_workers: False
   feature_cols: 
     - "Re"
     - "G1"
@@ -28,9 +29,10 @@ model:
   hidden_layers: [256,128,64]
  
 training:
+  device: "cpu"
   batch_size: 32
   num_workers: 10
-  max_epochs: 100
+  max_epochs: 1
   learning_rate: 0.001
   lr_scheduler_patience: 20
   lr_scheduler_factor: 0.5

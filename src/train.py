@@ -36,6 +36,8 @@ def trainer(config: Config):
     )
 
     model = LiftFNN(
+        n_inputs=len(config.data.feature_cols),
+        n_outputs=len(config.data.target_cols),
         hidden_layers=config.model.hidden_layers,
         learning_rate=config.training.learning_rate,
         lr_scheduler_patience=config.training.lr_scheduler_patience,
