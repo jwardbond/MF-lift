@@ -1,0 +1,33 @@
+data:
+  batch_size: 32
+  feature_cols:
+  - Re
+  - ux
+  - uy
+  - uxx
+  - uyy
+  - uxy
+  num_workers: 11
+  persistent_workers: true
+  target_cols:
+  - clx
+  - cly
+model:
+  hidden_layers:
+  - 256
+  - 128
+  - 64
+paths:
+  output_dir: outputs/
+  pred_data: C:/Users/jesse_8eqas6o/OneDrive/Projects/programming/mf-lift/data/combined/rts.csv
+  test_data: C:/Users/jesse_8eqas6o/OneDrive/Projects/programming/mf-lift/data/combined/rts_test.csv
+  train_data: C:/Users/jesse_8eqas6o/OneDrive/Projects/programming/mf-lift/data/combined/rts_train.csv
+  val_data: C:/Users/jesse_8eqas6o/OneDrive/Projects/programming/mf-lift/data/combined/rts_val.csv
+run_name: rts
+training:
+  device: cpu
+  early_stop_patience: 30
+  learning_rate: 0.001
+  lr_scheduler_factor: 0.5
+  lr_scheduler_patience: 20
+  max_epochs: 300

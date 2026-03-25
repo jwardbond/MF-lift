@@ -1,0 +1,34 @@
+run_name: rectangular_example
+
+paths:
+  train_data: "../data/r_train.csv"
+  val_data: "../data/r_val.csv"
+  test_data: "../data/r_test.csv"
+  pred_data: "../data/r.csv"
+  output_dir: outputs/
+
+data:
+  batch_size: 32
+  num_workers: 11
+  persistent_workers: True
+  feature_cols:
+    - "Re"
+    - "ux"
+    - "uy"
+    - "uxx"
+    - "uyy"
+    - "uxy"
+  target_cols:
+    - "clx"
+    - "cly"
+
+model: 
+  hidden_layers: [256,128,64]
+ 
+training:
+  device: "cpu"
+  max_epochs: 300
+  learning_rate: 0.001
+  lr_scheduler_patience: 20
+  lr_scheduler_factor: 0.5
+  early_stop_patience: 30
