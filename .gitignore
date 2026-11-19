@@ -80,3 +80,10 @@ venv.bak/
 # PyPI configuration file
 .pypirc
 
+# LLM
+.claude/
+
+# Scratchpad
+analysis/
+exports/ 
+examples/
